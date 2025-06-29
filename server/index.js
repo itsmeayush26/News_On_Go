@@ -1,104 +1,77 @@
-require('dotenv').config();
-const express =require ("express");
-const axios =require ("axios");
-const cors =require ("cors");
+require("dotenv").config();
+const express = require("express");
+const axios = require("axios");
+const cors = require("cors");
 
-
-const app =express ();
+const app = express();
 
 app.use(cors());
-app.use(express.urlencoded({extended:true}));
-
-
+app.use(express.urlencoded({ extended: true }));
 
 const API_KEY = process.env.API_KEY;
 
-
-
-
-
- 
-function fetchNews(url,res){
-    axios.get(url)
-    .then(response =>{
-        if (response.data.totalResults >0){
-            res.json({
-                status: 200,
-                success:true,
-                message :"successfully fetched the data",
-                data:response.data
-
-            });
-
-        }else{
-            res.json({
-                status :200,
-                success:true,
-                message:"no more results to show "
-
-            });
-
-        }
+function fetchNews(url, res) {
+  axios.get(url)
+    .then((response) => {
+      if (response.data.totalResults > 0) {
+        res.json({
+          status: 200,
+          success: true,
+          message: "successfully fetched the data",
+          data: response.data,
+        });
+      } else {
+        res.json({
+          status: 200,
+          success: true,
+          message: "no more results to show ",
+        });
+      }
     })
 
-    .catch(error =>{
-        res.json({
-            status :500,
-            success:false,
-            message:"failed to fetched from the API ",
-            error:error.message
-
-        });
-
-    });   
+    .catch((error) => {
+      res.json({
+        status: 500,
+        success: false,
+        message: "failed to fetched from the API ",
+        error: error.message,
+      });
+    });
 }
 
-
-
-
 //all news
-app.get ("/all-news",(req,res)=>{
-   
-    let pageSize =parseInt(req.query.pageSize) || 40;
-    let page=parseInt(req.query.page)||1;
-    
-    let url =`https://newsapi.org/v2/everything?q=page=${page}&pageSize=${pageSize}&apiKey=${API_KEY}`;
-    
+app.get("/all-news", (req, res) => {
+  let pageSize = parseInt(req.query.pageSize) || 40;
+  let page = parseInt(req.query.page) || 1;
 
-    fetchNews(url,res);
+  let url = `https://newsapi.org/v2/everything?q=page=${page}&pageSize=${pageSize}&apiKey=${API_KEY}`;
 
+  fetchNews(url, res);
 });
+//port
 
-
-const PORT =process.env.PORT || 3000;
-app.listen(PORT,()=>{
-    console.log(`server is listening at port ${PORT}`);
-
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`server is listening at port ${PORT}`);
 });
 
 //top-headlines
-app.options("/top-headlines",cors());
-app.get("/top-headlines", (req,res) =>{
-    let pageSize =parseInt(req.query.pageSize) || 80;
-    let page=parseInt(req.query.page)||1;
-    let category =req.query.category ||"business";
-    
-    let url =`https://newsapi.org/v2/top-headlines?category=${category}&language=en&page=${page}&pageSize=${pageSize}&apiKey=${API_KEY}`;
-    fetchNews(url,res);
+app.options("/top-headlines", cors());
+app.get("/top-headlines", (req, res) => {
+  let pageSize = parseInt(req.query.pageSize) || 80;
+  let page = parseInt(req.query.page) || 1;
+  let category = req.query.category || "business";
+
+  let url = `https://newsapi.org/v2/top-headlines?category=${category}&language=en&page=${page}&pageSize=${pageSize}&apiKey=${API_KEY}`;
+  fetchNews(url, res);
 });
 
-//country 
+//country
 app.options("/country/:iso", cors());
-app.get("/country/:iso",(req,res)=>{
-    let pageSize= parseInt(req.query.pageSize) || 80;
-    let page =parseInt(req.query.page) || 1;
-    const country =req.params.iso;
-    let url = `https://newsapi.org/v2/top-headlines?country=${country}&apiKey=${API_KEY}&page=${page}&pageSize=${pageSize}`;
-    fetchNews(url,res);
+app.get("/country/:iso", (req, res) => {
+  let pageSize = parseInt(req.query.pageSize) || 80;
+  let page = parseInt(req.query.page) || 1;
+  const country = req.params.iso;
+  let url = `https://newsapi.org/v2/top-headlines?country=${country}&apiKey=${API_KEY}&page=${page}&pageSize=${pageSize}`;
+  fetchNews(url, res);
 });
-
-
-
-
-
-
